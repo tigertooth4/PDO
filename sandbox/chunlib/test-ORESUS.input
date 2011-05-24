@@ -1,0 +1,34 @@
+)clear all
+)compile ORESUS.spad
+
+R := EXPR INT
+S :Symbol := '(_∂)
+F := (operator 'f)[t]
+σ : Automorphism(R) := 1
+δ : R -> R := f +-> D(f,t)
+
+SkewSeries := ORESUS(R,S,σ, δ)
+
+g := coerce(f)$SkewSeries
+
+l: List R := [f,f]
+
+generate(l,-2)$SkewSeries
+
+generate([F for i in 1..],1)$SkewSeries
+
+-----------------------------------------
+----   add a new sus here  -----
+SkewSeries := ORESUS(R,S,σ, δ)
+
+g := coerce(f)$SkewSeries
+
+l: List R := [f,f]
+
+generate(l,-2)$SkewSeries1
+
+generate([F for i in 1..],1)$SkewSeries1
+
+--  测试加法
+SkewSeries+SkewSeries1
+
