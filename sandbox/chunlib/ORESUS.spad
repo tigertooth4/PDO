@@ -137,19 +137,19 @@ UnivariateSkewSeries(R:Ring, Var:Symbol, sigma:Automorphism R, delta: R -> R) : 
         cs := rst cs                                                            
         count := count+1                                                        
       empty? cs => 0                                                            
-      [cs,x.hipow-count,x.lopow]                                                
+      [cs,x.hi-count,x.lo]                                                
                                                                                 
                                                                                 
     cutTail(x:%):% ==                                                           
       -- Erases trailing zeros in coefficient stream of finite PDOs.            
       -- Called by "+".                                                         
-      infinite?(x.lopow) => x                                                   
-      n := (x.hipow-retract(x.lopow)+SMin)::NNI                                 
+      infinite?(x.lo) => x                                                   
+      n := (x.hi-retract(x.lo)+SMin)::NNI                                 
       cs:LC :=  [x.coef.i for i in SMin..n]                                     
       while last(cs)=0 repeat                                                   
         n := (n-1)::NNI                                                         
         cs := first(cs,n)                                                       
-      [cs::SC,x.hipow,(x.hipow-n+SMin)::INF]                                    
+      [cs::SC,x.hi,(x.hi)::INF]                                    
 
     -- ------------------------- --                                             
     -- Simple Algebra Operations --                                             
@@ -159,13 +159,13 @@ UnivariateSkewSeries(R:Ring, Var:Symbol, sigma:Automorphism R, delta: R -> R) : 
                                                                                 
     1 : % == [[1$CoefDom]::SC,0,0$INF]                                          
                                                                                 
-    x:% = y:%  == (x.hipow=y.hipow) and (x.lopow=y.lopow) and (x.coef=y.coef)   
+    x:% = y:%  == (x.hi=y.hi) and (x.lo=y.lo) and (x.coef=y.coef)   
                                                                                 
     x:% + y:% ==                                                                
       -- Makes use of procedures for Taylor series.                             
-      n := x.hipow - y.hipow                                                    
-      h := max(x.hipow,y.hipow)                                                 
-      l := min(x.lopow,y.lopow)                                                 
+      n := x.hi - y.hi
+      h := max(x.hi,y.hi)                                                 
+      l := min(x.lo,y.lo)                                                 
       if n>=0 then                                                              
         res := x.coef + move(y.coef,n::NNI)                                     
       else                                                                      
