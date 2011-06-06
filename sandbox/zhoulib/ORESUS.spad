@@ -181,9 +181,10 @@ UnivariateSkewSeries(R:Ring, Var:Symbol, sigma:Automorphism R, delta: R -> R) : 
 
 
 
-
 	    --"O"::OUT
------------test-plus.inv---------
+
+
+-----------test-plus.input---------
 )set ou tex on
 )set ou alg off
 )clear all
