@@ -45,6 +45,9 @@ UnivariateSkewSeries(R:Ring, Var:Symbol, sigma:Automorphism R, delta: R -> R) : 
 	explicitlyFinite? : % -> %
 	    ++ \axiom{explicitlyFinite?(s)} checks explicitly, whether \axiom{s} is 
 	    ++ finite. May cause explicit computation of more coefficients.
+	
+	move: (SC,NNI) -> SC
+	 
 
     Implementation == add
     
@@ -119,79 +122,60 @@ UnivariateSkewSeries(R:Ring, Var:Symbol, sigma:Automorphism R, delta: R -> R) : 
 	    i:NNI
 	    polynom([cs.i for i in SMin..SLen],s.hi)+ prefix("O"::OUT, [Var::OUT^(s.hi-SLen-SMin+1)::OUT])
 
-    -- ----------------- --
-    -- Local Functions   --
-    -- ----------------- --
-    move(x:SC,n:NNI):SC ==                                                      
-      -- Adds n leading zeros.                                                  
-      -- Called by "+".                                                         
-      insert([0$CoefDom for i in 1..n]::SC,x,1)                                 
-                                                                                
-                                                                                
-    cutHead(x:%):% ==                                                           
-      -- Erases leading zeros in coefficient stream.                            
-      -- Called by "+" and differentiate.                                       
-      cs := x.coef                                                              
-      count := 0$NNI                                                            
-      while not empty?(cs) and zero? frst(cs) and (count<=SLen) repeat          
-        cs := rst cs                                                            
-        count := count+1                                                        
-      empty? cs => 0                                                            
-      [cs,x.hi-count,x.lo]                                                
-                                                                                
-                                                                                
-    cutTail(x:%):% ==                                                           
-      -- Erases trailing zeros in coefficient stream of finite PDOs.            
-      -- Called by "+".                                                         
-      infinite?(x.lo) => x                                                   
-      n := (x.hi-retract(x.lo)+SMin)::NNI                                 
-      cs:LC :=  [x.coef.i for i in SMin..n]                                     
-      while last(cs)=0 repeat                                                   
-        n := (n-1)::NNI                                                         
-        cs := first(cs,n)                                                       
-      [cs::SC,x.hi,(x.hi)::INF]                                    
+	-- ----------------- --
+	-- Local Functions   --
+	-- ----------------- --
+	move(x:SC,n:NNI):SC ==                                                      
+	    -- Adds n leading zeros.                                                  
+	    -- Called by "+".                                                         
+	    insert([0$R for i in 1..n]::SC,x,1)                                 
+										    
+										    
+	cutHead(x:%):% ==                                                           
+	    -- Erases leading zeros in coefficient stream.                            
+	    -- Called by "+" and differentiate.                                       
+	    cs := x.coef                                                              
+	    count := 0$NNI                                                            
+	    while not empty?(cs) and zero? frst(cs) and (count<=SLen) repeat          
+		cs := rst cs                                                            
+		count := count+1                                                        
+	    empty? cs => 0                                                            
+	    [cs,x.hi-count,x.lo]                                                
+										    
+										    
+	cutTail(x:%):% ==                                                           
+	    -- Erases trailing zeros in coefficient stream of finite PDOs.            
+	    -- Called by "+".                                                         
+	    infinite?(x.lo) => x                                                   
+	    n := (x.hi-retract(x.lo)+SMin)::NNI                                 
+	    cs:LC :=  [x.coef.i for i in SMin..n]                                     
+	    while last(cs)=0 repeat                                                   
+		n := (n-1)::NNI                                                         
+		cs := first(cs,n)                                                       
+	    [cs::SC,x.hi,(x.hi)::INF]                                    
 
-    -- ------------------------- --                                             
-    -- Simple Algebra Operations --                                             
-    -- ------------------------- --                                             
-                                                                                
-    0 : % == [[0$R]::SC,0,0$INF]
-                                                                                
-    1 : % == [[1$R]::SC,0,0$INF]                                          
-                                                                                
-    x:% = y:%  == (x.hi=y.hi) and (x.lo=y.lo) and (x.coef=y.coef)   
-                                                                                
-    x:% + y:% ==                                                                
-      -- Makes use of procedures for Taylor series.                             
-      n := x.hi - y.hi
-      h := max(x.hi,y.hi)                                                 
-      l := min(x.lo,y.lo)                                                 
-      if n>=0 then                                                              
-        res := x.coef + move(y.coef,n::NNI)                                     
-      else                                                                      
-        res := move(x.coef,(-n)::NNI) + y.coef                                  
-      infinite? l => cutHead [res,h,l]                                          
-      cutTail cutHead [extend(res,h-retract(l)+1),h,l]   
+	-- ------------------------- --                                             
+	-- Simple Algebra Operations --                                             
+	-- ------------------------- --                                             
+										    
+	0 : % == [[0$R]::SC,0,0$INF]
+										    
+	1 : % == [[1$R]::SC,0,0$INF]                                          
+										    
+	x:% = y:%  == (x.hi=y.hi) and (x.lo=y.lo) and (x.coef=y.coef)   
+										    
+	x:% + y:% ==                                                                
+	    -- Makes use of procedures for Taylor series.                             
+	    n := x.hi - y.hi
+	    h := max(x.hi,y.hi)                                                 
+	    l := min(x.lo,y.lo)                                                 
+	    if n>=0 then                                                              
+	      res := x.coef + move(y.coef,n::NNI)                                     
+	    else                                                                      
+	      res := move(x.coef,(-n)::NNI) + y.coef                                  
+	    infinite? l => cutHead [res,h,l]                                          
+	    cutTail cutHead [extend(res,h-retract(l)+1),h,l]   
 
-    -x:%==[-x.coef,x.hi,x.lo]
+	-x:%==[-x.coef,x.hi,x.lo]
 
-
- 
-
-
-
-
-	    --"O"::OUT
-
-
------------test-plus.input---------
-)set ou tex on
-)set ou alg off
-)clear all
-)compile ORESUS.spad
-F :%:= (operator 'f)[t]
-P:%:= (operator 'g)[t]
-M:=(F+P)2
-N:=(F+P)3
-M+N
-
+     

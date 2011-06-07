@@ -13,6 +13,8 @@ g := coerce(f)$SkewSeries
 
 l: List R := [f,f]
 
-generate(l,-2)$SkewSeries
+s1:= generate(l,-2)$SkewSeries
 
-generate([F for i in 1..],1)$SkewSeries
+s2:= generate([F for i in 1..],1)$SkewSeries
+
+s := s1+s2

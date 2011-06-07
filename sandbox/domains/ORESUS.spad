@@ -45,6 +45,9 @@ UnivariateSkewSeries(R:Ring, Var:Symbol, sigma:Automorphism R, delta: R -> R) : 
 	explicitlyFinite? : % -> %
 	    ++ \axiom{explicitlyFinite?(s)} checks explicitly, whether \axiom{s} is 
 	    ++ finite. May cause explicit computation of more coefficients.
+	
+	move: (SC,NNI) -> SC
+	 
 
     Implementation == add
     
@@ -118,4 +121,66 @@ UnivariateSkewSeries(R:Ring, Var:Symbol, sigma:Automorphism R, delta: R -> R) : 
 	    explicitlyFinite? cs => polynom(entries cs, s.hi)
 	    i:NNI
 	    polynom([cs.i for i in SMin..SLen],s.hi)+ prefix("O"::OUT, [Var::OUT^(s.hi-SLen-SMin+1)::OUT])
-	    --"O"::OUT
+
+	-- ----------------- --
+	-- Local Functions   --
+	-- ----------------- --
+	move(x:SC,n:NNI):SC ==                                                      
+	    -- Adds n leading zeros.                                                  
+	    -- Called by "+".                                                         
+	    insert([0$R for i in 1..n]::SC,x,1)                                 
+										    
+										    
+	cutHead(x:%):% ==                                                           
+	    -- Erases leading zeros in coefficient stream.                            
+	    -- Called by "+" and differentiate.                                       
+	    cs := x.coef                                                              
+	    count := 0$NNI                                                            
+	    while not empty?(cs) and zero? frst(cs) and (count<=SLen) repeat          
+		cs := rst cs                                                            
+		count := count+1                                                        
+	    empty? cs => 0                                                            
+	    [cs,x.hi-count,x.lo]                                                
+										    
+										    
+	cutTail(x:%):% ==                                                           
+	    -- Erases trailing zeros in coefficient stream of finite PDOs.            
+	    -- Called by "+".                                                         
+	    infinite?(x.lo) => x                                                   
+	    n := (x.hi-retract(x.lo)+SMin)::NNI                                 
+	    cs:LC :=  [x.coef.i for i in SMin..n]                                     
+	    while last(cs)=0 repeat                                                   
+		n := (n-1)::NNI                                                         
+		cs := first(cs,n)                                                       
+	    [cs::SC,x.hi,(x.hi)::INF]                                    
+
+	-- ------------------------- --                                             
+	-- Simple Algebra Operations --                                             
+	-- ------------------------- --                                             
+										    
+	0 : % == [[0$R]::SC,0,0$INF]
+										    
+	1 : % == [[1$R]::SC,0,0$INF]                                          
+										    
+	x:% = y:%  == (x.hi=y.hi) and (x.lo=y.lo) and (x.coef=y.coef)   
+					
+	
+	x:% + y:% ==                                                                
+	    -- Makes use of procedures for Taylor series.                             
+	    n := x.hi - y.hi
+	    h := max(x.hi,y.hi)                                                 
+	    l := min(x.lo,y.lo)                                                 
+	    sumCoef: (R,R) -> R := (r1,r2) +-> r1+r2
+	    if n>=0 then                                                              
+	      	tmp := move(y.coef, n::NNI)
+		res := map(sumCoef, x.coef,tmp)                                     
+	    else                                                                      
+	      	res := map(sumCoef, move(x.coef,(-n)::NNI), y.coef)                                  
+	    infinite? l => cutHead [res,h,l]                                          
+	    cutTail cutHead [extend(res,h-retract(l)+1),h,l]   
+
+	-x:% == 
+	    minusCoef: R -> R := r1 +-> -r1
+	    [map(minusCoef,x.coef),x.hi,x.lo]
+
+     

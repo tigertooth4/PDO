@@ -1,0 +1,11 @@
+-----------test-plus.input---------
+)set ou tex on
+)set ou alg off
+)clear all
+)compile ORESUS.spad
+F :%:= (operator 'f)[t]
+P:%:= (operator 'g)[t]
+M:=(F+P)^2
+N:=(F+P)^3
+M+N
+
